@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Flunt.Notifications;
+using Microsoft.EntityFrameworkCore;
 using Products;
 
 namespace Data;
@@ -14,6 +15,8 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Ignore<Notification>();
+        
         modelBuilder.Entity<Product>()
             .Property(p => p.Name).IsRequired(true);
 
