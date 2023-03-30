@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using EndPoints;
 
 namespace Employees;
 
@@ -15,19 +16,18 @@ public class EmployeePost
         var result = userManager.CreateAsync(user, employeeRequest.Password).Result;
 
         if (!result.Succeeded)
-            return Results.BadRequest(result.Errors.FirstOrDefault());
+            return Results.BadRequest(result.Errors.ConvertToProblemDetails());
 
-        var claimResult = userManager.AddClaimAsync(user, new Claim
-            ("EmployeeCode", employeeRequest.EmployeeCode)).Result;
+        var userClaims = new List<Claim>
+        {
+            new Claim("EmployeeCode", employeeRequest.EmployeeCode),
+            new Claim("Name", employeeRequest.Name)
+        };
 
-        if(!claimResult.Succeeded)
-            return Results.BadRequest(result.Errors.FirstOrDefault());
-
-        claimResult = userManager.AddClaimAsync(user, new Claim
-            ("Name", employeeRequest.Name)).Result;
+        var claimResult = userManager.AddClaimsAsync(user, userClaims).Result;
 
         if (!claimResult.Succeeded)
-            return Results.BadRequest(result.Errors.FirstOrDefault());
+            return Results.BadRequest(claimResult.Errors.ConvertToProblemDetails());
 
         return Results.Created($"/employees/{user.Id}", user.Id);
     }
