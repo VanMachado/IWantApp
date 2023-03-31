@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSqlServer<ApplicationDbContext>(
     builder.Configuration["ConnectionStrings:IWantDb"]);
+builder.Services.AddScoped<QueryAllUsersWithClaimName>();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;
