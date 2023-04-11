@@ -1,4 +1,5 @@
 ﻿using Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Employees;
 
@@ -8,6 +9,7 @@ public class EmployeeGetAll
     public static string[] Methods => new string[] { HttpMethod.Get.ToString() };
     public static Delegate Handle => Action;
 
+    [Authorize(Policy = "EmployeePolicy")]
     public static IResult Action(int? page, int? rows, QueryAllUsersWithClaimName query)
     {
         if (page == null || rows == null)

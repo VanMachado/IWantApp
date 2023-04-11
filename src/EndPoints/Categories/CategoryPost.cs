@@ -1,6 +1,8 @@
 ﻿using Data;
 using Products;
 using EndPoints;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Categories;
 
@@ -10,18 +12,16 @@ public class CategoryPost
     public static string[] Methods => new string[] { HttpMethod.Post.ToString() };
     public static Delegate Handle => Action;
 
-    public static IResult Action(CategoryRequest categoryRequest, ApplicationDbContext context)
+    [Authorize(Policy = "EmployeePolicy")]
+    public static IResult Action(CategoryRequest categoryRequest,HttpContext http, ApplicationDbContext context)
     {
-        //Funciona, porem eh mais trabalhoso validar todas as propriedades necessarias
-        //if(string.IsNullOrEmpty(categoryRequest.Name))
-        //    return Results.BadRequest("Name is required");
-        var category = new Category(categoryRequest.Name, categoryRequest.CreatedBy,
-            categoryRequest.EditedBy);
+        var userId = http.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+        var category = new Category(categoryRequest.Name, userId, userId);
 
         if (!category.IsValid)
-        {            
+        {
             return Results.ValidationProblem(category.Notifications.ConvertToProblemDetails());
-        }            
+        }
 
         context.Categories.Add(category);
         context.SaveChanges();
