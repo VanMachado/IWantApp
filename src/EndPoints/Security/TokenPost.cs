@@ -16,8 +16,10 @@ public class TokenPost
 
     [AllowAnonymous]
     public static IResult Action(LoginRequest loginRequest, IConfiguration configuration,
-        UserManager<IdentityUser> userManager)
+        UserManager<IdentityUser> userManager, ILogger<TokenPost> log)
     {
+        log.LogInformation("Token generated");        
+
         var user = userManager.FindByEmailAsync(loginRequest.Email).Result;
         var result = userManager.CheckPasswordAsync(user, loginRequest.Password).Result;
 
