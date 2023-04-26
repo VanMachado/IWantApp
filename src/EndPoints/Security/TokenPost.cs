@@ -16,9 +16,9 @@ public class TokenPost
 
     [AllowAnonymous]
     public static IResult Action(LoginRequest loginRequest, IConfiguration configuration,
-        UserManager<IdentityUser> userManager, ILogger<TokenPost> log)
+        UserManager<IdentityUser> userManager, ILogger<TokenPost> log, IWebHostEnvironment env)
     {
-        log.LogInformation("Token generated");        
+        log.LogInformation("Token generated");
 
         var user = userManager.FindByEmailAsync(loginRequest.Email).Result;
         var result = userManager.CheckPasswordAsync(user, loginRequest.Password).Result;
@@ -44,7 +44,8 @@ public class TokenPost
                 new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             Audience = configuration["JwtBearerTokenSettings:Audience"],
             Issuer = configuration["JwtBearerTokenSettings:Issuer"],
-            Expires = DateTime.UtcNow.AddSeconds(30)
+            Expires = env.IsDevelopment() || env.IsStaging() ? DateTime.UtcNow.AddYears(1) :
+                DateTime.UtcNow.AddMinutes(2)
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

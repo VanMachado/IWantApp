@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
+using Products;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSerilog((context, configuration) =>
@@ -87,6 +89,10 @@ app.MapMethods(CategoryPut.Template, CategoryPut.Methods, CategoryPut.Handle);
 app.MapMethods(CategoryDelete.Template, CategoryDelete.Methods, CategoryDelete.Handle);
 app.MapMethods(EmployeePost.Template, EmployeePost.Methods, EmployeePost.Handle);
 app.MapMethods(EmployeeGetAll.Template, EmployeeGetAll.Methods, EmployeeGetAll.Handle);
+app.MapMethods(ProductsPost.Template, ProductsPost.Methods, ProductsPost.Handle);
+app.MapMethods(ProductsGetAll.Template, ProductsGetAll.Methods, ProductsGetAll.Handle);
+app.MapMethods(ProductGetOne.Template, ProductGetOne.Methods, ProductGetOne.Handle);
+app.MapMethods(ProductsGetShowCase.Template, ProductsGetShowCase.Methods, ProductsGetShowCase.Handle);
 app.MapMethods(TokenPost.Template, TokenPost.Methods, TokenPost.Handle);
 
 app.UseExceptionHandler("/error");
@@ -96,6 +102,9 @@ app.Map("/error", (HttpContext http) =>
 
     if (error is SqlException)
         return Results.Problem(title: "Database is out", statusCode: 500);
+    else if (error is FormatException || error is JsonException ||
+        error is BadHttpRequestException)
+        return Results.Problem(title: "Error to convert data to other type", statusCode: 500);
 
     return Results.Problem(title: "An Error ocurred", statusCode: 500);
 });
