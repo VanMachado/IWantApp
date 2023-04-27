@@ -105,6 +105,8 @@ app.Map("/error", (HttpContext http) =>
     else if (error is FormatException || error is JsonException ||
         error is BadHttpRequestException)
         return Results.Problem(title: "Error to convert data to other type", statusCode: 500);
+    else if(error is NullReferenceException)
+        return Results.Problem(title: "Product not found", statusCode: 404);
 
     return Results.Problem(title: "An Error ocurred", statusCode: 500);
 });

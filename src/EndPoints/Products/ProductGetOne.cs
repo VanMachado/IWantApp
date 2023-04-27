@@ -1,4 +1,5 @@
 ﻿using Data;
+using EndPoints;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +17,8 @@ public class ProductGetOne
             .Include(c => c.Category)
             .FirstOrDefault();
         
-        if (product == null)
-            return Results.NotFound("Sorry, Product not found");
+        //if (!product.IsValid)
+        //    return Results.BadRequest("Product not found");
 
         var response = new ProductResponse(product.Name, product.Category.Name, product.Description, product.HasStock,
             product.Active, product.Price);
