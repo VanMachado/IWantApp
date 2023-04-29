@@ -13,6 +13,8 @@ using Serilog;
 using Serilog.Sinks.MSSqlServer;
 using Products;
 using System.Text.Json;
+using Clients;
+using Users;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSerilog((context, configuration) =>
@@ -39,6 +41,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 }).AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<QueryAllUsersWithClaimName>();
+builder.Services.AddScoped<UserCreator>();
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -93,6 +96,8 @@ app.MapMethods(ProductsPost.Template, ProductsPost.Methods, ProductsPost.Handle)
 app.MapMethods(ProductsGetAll.Template, ProductsGetAll.Methods, ProductsGetAll.Handle);
 app.MapMethods(ProductGetOne.Template, ProductGetOne.Methods, ProductGetOne.Handle);
 app.MapMethods(ProductsGetShowCase.Template, ProductsGetShowCase.Methods, ProductsGetShowCase.Handle);
+app.MapMethods(ClientPost.Template, ClientPost.Methods, ClientPost.Handle);
+app.MapMethods(ClientGet.Template, ClientGet.Methods, ClientGet.Handle);
 app.MapMethods(TokenPost.Template, TokenPost.Methods, TokenPost.Handle);
 
 app.UseExceptionHandler("/error");

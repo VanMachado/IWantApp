@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using EndPoints;
 using Microsoft.AspNetCore.Authorization;
+using Users;
 
 namespace Employees;
 
@@ -12,26 +13,23 @@ public class EmployeePost
     public static Delegate Handle => Action;
 
     [Authorize(Policy = "EmployeePolicy")]
-    public static async Task<IResult> Action(EmployeeRequest employeeRequest, HttpContext http, UserManager<IdentityUser> userManager)
+    public static async Task<IResult> Action(EmployeeRequest employeeRequest, HttpContext http,
+        UserCreator userCreator)
     {
         var userId = http.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
-        var newUser = new IdentityUser { UserName = employeeRequest.Email, Email = employeeRequest.Email };
-        var result = await userManager.CreateAsync(newUser, employeeRequest.Password);
-
-        if (!result.Succeeded)
-            return Results.BadRequest(result.Errors.ConvertToProblemDetails());
-
         var userClaims = new List<Claim>
         {
             new Claim("EmployeeCode", employeeRequest.EmployeeCode),
             new Claim("Name", employeeRequest.Name),
             new Claim("CreatedBy", userId)
         };
-        var claimResult = await userManager.AddClaimsAsync(newUser, userClaims);
 
-        if (!claimResult.Succeeded)
-            return Results.BadRequest(claimResult.Errors.ConvertToProblemDetails());
+        (IdentityResult identity, string id) result = 
+            await userCreator.Create(employeeRequest.Email, employeeRequest.Password, userClaims);
 
-        return Results.Created($"/employees/{newUser.Id}", newUser.Id);
+        if (!result.identity.Succeeded)
+            return Results.ValidationProblem(result.identity.Errors.ConvertToProblemDetails());
+
+        return Results.Created($"/employees/{result.id}", result.id);
     }
 }
