@@ -1,7 +1,5 @@
 ﻿using System.Security.Claims;
-using Data;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 namespace Clients;
 

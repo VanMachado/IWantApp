@@ -42,6 +42,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 }).AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<QueryAllUsersWithClaimName>();
+builder.Services.AddScoped<QueryAllProductsSold>();
 builder.Services.AddScoped<UserCreator>();
 builder.Services.AddAuthorization(options =>
 {
@@ -52,7 +53,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EmployeePolicy", p => p.RequireAuthenticatedUser()
         .RequireClaim("EmployeeCode", "03"));
     options.AddPolicy("CpfPolicy", p => p.RequireAuthenticatedUser()
-        .RequireClaim("Cpf"));
+        .RequireClaim("Cpf"));    
 });
 builder.Services.AddAuthentication(x =>
 {
@@ -102,6 +103,8 @@ app.MapMethods(ProductsGetShowCase.Template, ProductsGetShowCase.Methods, Produc
 app.MapMethods(ClientPost.Template, ClientPost.Methods, ClientPost.Handle);
 app.MapMethods(ClientGet.Template, ClientGet.Methods, ClientGet.Handle);
 app.MapMethods(OrderPost.Template, OrderPost.Methods, OrderPost.Handle);
+app.MapMethods(OrderGet.Template, OrderGet.Methods, OrderGet.Handle);
+app.MapMethods(ProductsSold.Template, ProductsSold.Methods, ProductsSold.Handle);
 app.MapMethods(TokenPost.Template, TokenPost.Methods, TokenPost.Handle);
 
 app.UseExceptionHandler("/error");
@@ -114,7 +117,7 @@ app.Map("/error", (HttpContext http) =>
     else if (error is FormatException || error is JsonException ||
         error is BadHttpRequestException)
         return Results.Problem(title: "Error to convert data to other type", statusCode: 500);
-    else if(error is NullReferenceException)
+    else if (error is NullReferenceException)
         return Results.Problem(title: "Product not found", statusCode: 404);
 
     return Results.Problem(title: "An Error ocurred", statusCode: 500);
