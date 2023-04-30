@@ -15,6 +15,7 @@ using Products;
 using System.Text.Json;
 using Clients;
 using Users;
+using Orders;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSerilog((context, configuration) =>
@@ -50,6 +51,8 @@ builder.Services.AddAuthorization(options =>
         .Build();
     options.AddPolicy("EmployeePolicy", p => p.RequireAuthenticatedUser()
         .RequireClaim("EmployeeCode", "03"));
+    options.AddPolicy("CpfPolicy", p => p.RequireAuthenticatedUser()
+        .RequireClaim("Cpf"));
 });
 builder.Services.AddAuthentication(x =>
 {
@@ -98,6 +101,7 @@ app.MapMethods(ProductGetOne.Template, ProductGetOne.Methods, ProductGetOne.Hand
 app.MapMethods(ProductsGetShowCase.Template, ProductsGetShowCase.Methods, ProductsGetShowCase.Handle);
 app.MapMethods(ClientPost.Template, ClientPost.Methods, ClientPost.Handle);
 app.MapMethods(ClientGet.Template, ClientGet.Methods, ClientGet.Handle);
+app.MapMethods(OrderPost.Template, OrderPost.Methods, OrderPost.Handle);
 app.MapMethods(TokenPost.Template, TokenPost.Methods, TokenPost.Handle);
 
 app.UseExceptionHandler("/error");
