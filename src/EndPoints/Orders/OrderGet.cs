@@ -19,25 +19,23 @@ public class OrderGet
             http.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
         
         if(http.User.Claims.FirstOrDefault(c => c.Type == "Cpf") == null)
-        {            
-            List<Order> orders = new List<Order>();
-            orders = await context.Orders
+        {                      
+            var orders = await context.Orders
                .Include(p => p.Products)
                .OrderBy(p => p.Name)
                .ToListAsync();                         
 
-            var responseEmployee = orders.Select(p => new OrderResponse(p.Id, p.ClientId, p.Name, p.Total, p.DeliveryAddress));
+            var responseEmployee = orders.Select(p => new OrderResponseEmployee(p.Id, p.ClientId, p.Name, p.DeliveryAddress));
 
             return Results.Ok(responseEmployee);
         }
 
-        var orderGet = await context.Orders
+        var op = context.Orders           
             .Include(p => p.Products)
-            .OrderBy(p => p.Name)
-            .Where(p => p.ClientId == clientId)
-            .ToListAsync();     
-
-        var response = orderGet.Select(p => new OrderResponse(p.Id, clientId, p.Name, p.Total, p.DeliveryAddress));
+            .FirstOrDefault(o => o.ClientId == clientId);   
+                
+        var orderProduct = op.Products.Select(p => new OrderProduct(p.Id, p.Name));
+        var response = new OrderResponse(op.Id, clientId, op.Name, op.DeliveryAddress, orderProduct);
 
         return Results.Ok(response);
     }
